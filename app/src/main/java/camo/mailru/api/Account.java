@@ -28,6 +28,8 @@ import okhttp3.RequestBody;
 public class Account {
 
     private static final String TAG = "camo.mailru.api.Account";
+    public static final MediaType DEFAULT_MEDIA_TYPE
+            = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
 
     private String Login;
     private String Password;
@@ -63,6 +65,7 @@ public class Account {
     public String getPassword(){
         return Password;
     }
+    public String getAuthToken() { return AuthToken; }
     public HashMap<HttpUrl, List<Cookie>> getCookieStore() { return cookieStore; }
 
     public void Login(){
@@ -105,7 +108,7 @@ public class Account {
                     ensureSdcCookie();
                 }
                 else{
-                    Log.v(TAG, "Failed login - phase 1");
+                    Log.v(TAG, "Failed login - phase 2");
                 }
             }
         });
@@ -138,7 +141,7 @@ public class Account {
                 if (cookieStore.containsKey(authUrl) && cookieStore.get(authUrl).size() > 0) {
                     Log.v(TAG, "Successful login - phase 2");
                     if (response.isSuccessful()){
-                        getAuthToken();
+                        obtainAuthToken();
                     }
                 }
                 else{
@@ -148,11 +151,7 @@ public class Account {
         });
     }
 
-    private void getAuthToken(){
-
-    }
-
-    private HttpUrl buildAuthUrl(){
+    private void obtainAuthToken(){
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
                 .host(ConstSettings.CLOUD_DOMAIN)
@@ -160,6 +159,21 @@ public class Account {
                 .addPathSegment("v2")
                 .addPathSegment("tokens")
                 .addPathSegment("csrf")
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .header("User-Agent", ConstSettings.USER_AGENT)
+                .addHeader("Accept", "application/json")
+                .build();
+    }
+
+    private HttpUrl buildAuthUrl(){
+        HttpUrl url = new HttpUrl.Builder()
+                .scheme("https")
+                .host(ConstSettings.AUTH_DOMAIN)
+                .addPathSegment("cgi-bin")
+                .addPathSegment("auth")
                 .build();
 
         return url;
