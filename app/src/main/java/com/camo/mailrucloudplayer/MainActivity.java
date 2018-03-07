@@ -1,5 +1,6 @@
 package com.camo.mailrucloudplayer;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
-                Account account = new Account("***REMOVED***", "***REMOVED***");
+                Account account = new Account("***REMOVED***", "***REMOVED***", getApplicationContext());
                 account.Login();
             }
         });

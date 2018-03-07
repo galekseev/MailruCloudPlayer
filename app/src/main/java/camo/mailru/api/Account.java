@@ -1,10 +1,15 @@
 package camo.mailru.api;
 
-import android.location.Location;
+import android.content.Context;
+//import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.franmontiel.persistentcookiejar.ClearableCookieJar;
+import com.franmontiel.persistentcookiejar.PersistentCookieJar;
+import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
+import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
+
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +20,6 @@ import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -28,56 +32,49 @@ import okhttp3.RequestBody;
 public class Account {
 
     private static final String TAG = "camo.mailru.api.Account";
-    public static final MediaType DEFAULT_MEDIA_TYPE
-            = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+//    public static final MediaType DEFAULT_MEDIA_TYPE
+//            = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
 
-    private String Login;
+    private String LoginName;
     private String Password;
-    private String AuthToken;
-    private OkHttpClient httpClient;
-    private final HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
+//    private String AuthToken;
+    private OkHttpClient okHttpClient;
+    private PersistentCookieJar cookieJar;
+//    private final HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
     private final HttpUrl authUrl = buildAuthUrl();
 
-    public Account(String login, String password){
-        Login = login;
+    public Account(String login, String password, Context context){
+        LoginName = login;
         Password = password;
 
-        httpClient = new OkHttpClient.Builder()
-            .cookieJar(new CookieJar() {
-                @Override
-                public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-                    cookieStore.put(url, cookies);
-                    Log.v(TAG, "cookies: " + cookies.size());
-                }
+        cookieJar =
+                new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(context));
 
-                @Override
-                public List<Cookie> loadForRequest(HttpUrl url) {
-                    List<Cookie> cookies = cookieStore.get(url);
-                    return cookies != null ? cookies : new ArrayList<Cookie>();
-                }
-            })
+        okHttpClient = new OkHttpClient.Builder()
+            .cookieJar(cookieJar)
             .build();
     }
 
-    public String getLogin(){
-        return Login;
+    public String getLoginName(){
+        return LoginName;
     }
     public String getPassword(){
         return Password;
     }
-    public String getAuthToken() { return AuthToken; }
-    public HashMap<HttpUrl, List<Cookie>> getCookieStore() { return cookieStore; }
 
+//    public String getAuthToken() { return AuthToken; }
+//    public HashMap<HttpUrl, List<Cookie>> getCookieStore() { return cookieStore; }
+//
     public void Login(){
         HttpUrl url = buildAuthUrl();
 
         Log.v(TAG, "Url: "+ url);
 
-        //String postBody = String.format("Login=%1&Domain=%3&Password=%2", this.Login, this.Password, ConstSettings.DOMAIN);
+        //String postBody = String.format("LoginName=%1&Domain=%3&Password=%2", this.LoginName, this.Password, ConstSettings.DOMAIN);
         //RequestBody body = RequestBody.create(DEFAULT_MEDIA_TYPE, postBody);
 
         RequestBody formBody = new FormBody.Builder()
-                .add("Login", this.Login)
+                .add("LoginName", this.LoginName)
                 .add("Domain", ConstSettings.DOMAIN)
                 .add("Password", this.Password)
                 .build();
@@ -93,7 +90,7 @@ public class Account {
 
         Log.v(TAG, "Request: "+request.toString());
 
-        httpClient.newCall(request).enqueue(new Callback() {
+        okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -103,71 +100,77 @@ public class Account {
             public void onResponse(Call call, Response response) throws IOException {
                 //Log.v(TAG, response.body().string());
 
-                if (cookieStore.containsKey(authUrl) && cookieStore.get(authUrl).size() > 0) {
+                List<Cookie> cookies = cookieJar.loadForRequest(authUrl);
+                if (cookies.size() > 0)
+                {
                     Log.v(TAG, "Successful login - phase 1");
-                    ensureSdcCookie();
                 }
-                else{
-                    Log.v(TAG, "Failed login - phase 2");
-                }
+                else Log.v(TAG, "Failed to login - phase 1");
+//                if (cookieStore.containsKey(authUrl) && cookieStore.get(authUrl).size() > 0) {
+//                    Log.v(TAG, "Successful login - phase 1");
+//                    ensureSdcCookie();
+//                }
+//                else{
+//                    Log.v(TAG, "Failed login - phase 2");
+//                }
             }
         });
     }
-
-    private void ensureSdcCookie(){
-        HttpUrl url = new HttpUrl.Builder()
-                .scheme("https")
-                .host(ConstSettings.AUTH_DOMAIN)
-                .addPathSegment("sdc")
-                .addQueryParameter("from", ConstSettings.CLOUD_DOMAIN + "/home")
-                .build();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .header("User-Agent", ConstSettings.USER_AGENT)
-                .addHeader("Accept", ConstSettings.DEFAULT_ACCEPT_TYPE)
-                .build();
-
-        httpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                //Log.v(TAG, response.body().string());
-
-                if (cookieStore.containsKey(authUrl) && cookieStore.get(authUrl).size() > 0) {
-                    Log.v(TAG, "Successful login - phase 2");
-                    if (response.isSuccessful()){
-                        obtainAuthToken();
-                    }
-                }
-                else{
-                    Log.v(TAG, "Failed login - phase 2");
-                }
-            }
-        });
-    }
-
-    private void obtainAuthToken(){
-        HttpUrl url = new HttpUrl.Builder()
-                .scheme("https")
-                .host(ConstSettings.CLOUD_DOMAIN)
-                .addPathSegment("api")
-                .addPathSegment("v2")
-                .addPathSegment("tokens")
-                .addPathSegment("csrf")
-                .build();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .header("User-Agent", ConstSettings.USER_AGENT)
-                .addHeader("Accept", "application/json")
-                .build();
-    }
-
+//
+//    private void ensureSdcCookie(){
+//        HttpUrl url = new HttpUrl.Builder()
+//                .scheme("https")
+//                .host(ConstSettings.AUTH_DOMAIN)
+//                .addPathSegment("sdc")
+//                .addQueryParameter("from", ConstSettings.CLOUD_DOMAIN + "/home")
+//                .build();
+//
+//        Request request = new Request.Builder()
+//                .url(url)
+//                .header("User-Agent", ConstSettings.USER_AGENT)
+//                .addHeader("Accept", ConstSettings.DEFAULT_ACCEPT_TYPE)
+//                .build();
+//
+//        httpClient.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                //Log.v(TAG, response.body().string());
+//
+//                if (cookieStore.containsKey(authUrl) && cookieStore.get(authUrl).size() > 0) {
+//                    Log.v(TAG, "Successful login - phase 2");
+//                    if (response.isSuccessful()){
+//                        obtainAuthToken();
+//                    }
+//                }
+//                else{
+//                    Log.v(TAG, "Failed login - phase 2");
+//                }
+//            }
+//        });
+//    }
+//
+//    private void obtainAuthToken(){
+//        HttpUrl url = new HttpUrl.Builder()
+//                .scheme("https")
+//                .host(ConstSettings.CLOUD_DOMAIN)
+//                .addPathSegment("api")
+//                .addPathSegment("v2")
+//                .addPathSegment("tokens")
+//                .addPathSegment("csrf")
+//                .build();
+//
+//        Request request = new Request.Builder()
+//                .url(url)
+//                .header("User-Agent", ConstSettings.USER_AGENT)
+//                .addHeader("Accept", "application/json")
+//                .build();
+//    }
+//
     private HttpUrl buildAuthUrl(){
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
