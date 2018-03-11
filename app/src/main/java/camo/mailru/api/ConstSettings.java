@@ -8,7 +8,7 @@ import okhttp3.MediaType;
 
 public class ConstSettings {
     public static final String DOMAIN = "mail.ru";
-    public static final String CLOUD_DOMAIN = "https://cloud.mail.ru";
+    public static final String CLOUD_DOMAIN = "cloud.mail.ru";
     public static final String AUTH_DOMAIN = "auth.mail.ru";
     public static final String PUBLISH_FILE_LINK = CLOUD_DOMAIN + "/public/";
 

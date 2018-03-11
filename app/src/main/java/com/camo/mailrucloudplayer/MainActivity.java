@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view){
                 Account account = new Account("***REMOVED***", "***REMOVED***", getApplicationContext());
                 account.Login();
+                account.getDiskUsage();
             }
         });
 

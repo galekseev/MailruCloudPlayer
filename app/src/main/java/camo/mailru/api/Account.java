@@ -1,23 +1,19 @@
 package camo.mailru.api;
 
+import android.accounts.NetworkErrorException;
 import android.content.Context;
-//import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.franmontiel.persistentcookiejar.ClearableCookieJar;
 import com.franmontiel.persistentcookiejar.PersistentCookieJar;
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Cookie;
-import okhttp3.CookieJar;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -37,13 +33,17 @@ public class Account {
 
     private String LoginName;
     private String Password;
-//    private String AuthToken;
+    private String AuthToken;
     private OkHttpClient okHttpClient;
     private PersistentCookieJar cookieJar;
-//    private final HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
-    private final HttpUrl authUrl = buildAuthUrl();
+    private final HttpUrl authUrl = new HttpUrl.Builder()
+            .scheme("https")
+            .host(ConstSettings.AUTH_DOMAIN)
+            .addPathSegment("cgi-bin")
+            .addPathSegment("auth")
+            .build();
 
-    public Account(String login, String password, Context context){
+    public Account(String login, String password, Context context) {
         LoginName = login;
         Password = password;
 
@@ -51,44 +51,40 @@ public class Account {
                 new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(context));
 
         okHttpClient = new OkHttpClient.Builder()
-            .cookieJar(cookieJar)
-            .build();
+                .cookieJar(cookieJar)
+                .build();
     }
 
-    public String getLoginName(){
+    public String getLoginName() {
         return LoginName;
     }
-    public String getPassword(){
+
+    public String getPassword() {
         return Password;
     }
 
-//    public String getAuthToken() { return AuthToken; }
+    public String getAuthToken() {
+        return AuthToken;
+    }
 //    public HashMap<HttpUrl, List<Cookie>> getCookieStore() { return cookieStore; }
-//
-    public void Login(){
-        HttpUrl url = buildAuthUrl();
 
-        Log.v(TAG, "Url: "+ url);
-
-        //String postBody = String.format("LoginName=%1&Domain=%3&Password=%2", this.LoginName, this.Password, ConstSettings.DOMAIN);
-        //RequestBody body = RequestBody.create(DEFAULT_MEDIA_TYPE, postBody);
+    public void Login() {
+        Log.v(TAG, "Url: " + authUrl);
 
         RequestBody formBody = new FormBody.Builder()
-                .add("LoginName", this.LoginName)
-                .add("Domain", ConstSettings.DOMAIN)
-                .add("Password", this.Password)
+                .addEncoded("Login", this.LoginName)
+                .addEncoded("Domain", ConstSettings.DOMAIN)
+                .addEncoded("Password", this.Password)
                 .build();
 
-        Log.v(TAG, "Body: "+formBody);
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(authUrl)
                 .header("User-Agent", ConstSettings.USER_AGENT)
                 .addHeader("Accept", ConstSettings.DEFAULT_ACCEPT_TYPE)
                 .post(formBody)
                 .build();
 
-        Log.v(TAG, "Request: "+request.toString());
+        Log.v(TAG, "Request: " + request.toString());
 
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -98,87 +94,140 @@ public class Account {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                //Log.v(TAG, response.body().string());
+                Log.v(TAG, "Got response!");
 
-                List<Cookie> cookies = cookieJar.loadForRequest(authUrl);
-                if (cookies.size() > 0)
-                {
-                    Log.v(TAG, "Successful login - phase 1");
+                if (response.isSuccessful()) {
+                    List<Cookie> cookies = cookieJar.loadForRequest(authUrl);
+                    if (cookies.size() > 0) {
+                        Log.v(TAG, "Successful login - phase 1");
+                        ensureSdcCookie();
+                    } else
+                        Log.v(TAG, "Failed to login - phase 1");
                 }
-                else Log.v(TAG, "Failed to login - phase 1");
-//                if (cookieStore.containsKey(authUrl) && cookieStore.get(authUrl).size() > 0) {
-//                    Log.v(TAG, "Successful login - phase 1");
-//                    ensureSdcCookie();
-//                }
-//                else{
-//                    Log.v(TAG, "Failed login - phase 2");
-//                }
             }
         });
     }
-//
-//    private void ensureSdcCookie(){
-//        HttpUrl url = new HttpUrl.Builder()
-//                .scheme("https")
-//                .host(ConstSettings.AUTH_DOMAIN)
-//                .addPathSegment("sdc")
-//                .addQueryParameter("from", ConstSettings.CLOUD_DOMAIN + "/home")
-//                .build();
-//
-//        Request request = new Request.Builder()
-//                .url(url)
-//                .header("User-Agent", ConstSettings.USER_AGENT)
-//                .addHeader("Accept", ConstSettings.DEFAULT_ACCEPT_TYPE)
-//                .build();
-//
-//        httpClient.newCall(request).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                //Log.v(TAG, response.body().string());
-//
-//                if (cookieStore.containsKey(authUrl) && cookieStore.get(authUrl).size() > 0) {
-//                    Log.v(TAG, "Successful login - phase 2");
-//                    if (response.isSuccessful()){
-//                        obtainAuthToken();
-//                    }
-//                }
-//                else{
-//                    Log.v(TAG, "Failed login - phase 2");
-//                }
-//            }
-//        });
-//    }
-//
-//    private void obtainAuthToken(){
-//        HttpUrl url = new HttpUrl.Builder()
-//                .scheme("https")
-//                .host(ConstSettings.CLOUD_DOMAIN)
-//                .addPathSegment("api")
-//                .addPathSegment("v2")
-//                .addPathSegment("tokens")
-//                .addPathSegment("csrf")
-//                .build();
-//
-//        Request request = new Request.Builder()
-//                .url(url)
-//                .header("User-Agent", ConstSettings.USER_AGENT)
-//                .addHeader("Accept", "application/json")
-//                .build();
-//    }
-//
-    private HttpUrl buildAuthUrl(){
+
+    private void ensureSdcCookie() {
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
                 .host(ConstSettings.AUTH_DOMAIN)
-                .addPathSegment("cgi-bin")
-                .addPathSegment("auth")
+                .addPathSegment("sdc")
+                .addQueryParameter("from", "https://" + ConstSettings.CLOUD_DOMAIN + "/home")
                 .build();
 
-        return url;
+        Request request = new Request.Builder()
+                .url(url)
+                .header("User-Agent", ConstSettings.USER_AGENT)
+                .addHeader("Accept", ConstSettings.DEFAULT_ACCEPT_TYPE)
+                .build();
+
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                Log.v(TAG, "Sdc call complete");
+
+                if (response.isSuccessful()) {
+                    Log.v(TAG, "Successful login - phase 2");
+                    obtainAuthToken();
+                } else {
+                    Log.v(TAG, "Failed login - phase 2");
+                }
+            }
+        });
+    }
+
+    private void obtainAuthToken() {
+        HttpUrl url = new HttpUrl.Builder()
+                .scheme("https")
+                .host(ConstSettings.CLOUD_DOMAIN)
+                .addPathSegment("api")
+                .addPathSegment("v2")
+                .addPathSegment("tokens")
+                .addPathSegment("csrf")
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .header("User-Agent", ConstSettings.USER_AGENT)
+                .addHeader("Accept", "application/json")
+                .build();
+
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                Log.v(TAG, "Auth token call complete");
+
+                if (response.isSuccessful()) {
+                    Log.v(TAG, "Successful login - phase 3");
+                } else {
+                    Log.v(TAG, "Failed login - phase 3");
+                }
+            }
+        });
+    }
+
+    public DiskUsage getDiskUsage() {
+        if (!this.checkAuth())
+            return null;
+
+        HttpUrl url = new HttpUrl.Builder()
+                .scheme("https")
+                .host(ConstSettings.CLOUD_DOMAIN)
+                .addPathSegment("api")
+                .addPathSegment("v2")
+                .addPathSegment("user")
+                .addPathSegment("space")
+                .addQueryParameter("api", "2")
+                .addQueryParameter("email", this.LoginName)
+                .addQueryParameter("token", this.AuthToken)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .header("User-Agent", ConstSettings.USER_AGENT)
+                .addHeader("Accept", "application/json")
+                .build();
+
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                Log.v(TAG, "Disk usage call complete");
+
+                if (response.isSuccessful()) {
+                    Log.v(TAG, response.body().toString());
+                } else {
+                    Log.v(TAG, "Failed login - phase 3");
+                }
+            }
+        });
+
+        return null;
+    }
+
+    private boolean checkAuth() {
+        if (this.LoginName == null && this.Password == null)
+            return false;
+
+        if (this.AuthToken == null || this.AuthToken.isEmpty()) {
+            Login();
+        }
+
+        return true;
     }
 }
