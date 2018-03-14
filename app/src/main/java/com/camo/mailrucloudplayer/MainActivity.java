@@ -14,10 +14,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.franmontiel.persistentcookiejar.PersistentCookieJar;
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
+
+import java.io.IOException;
 
 import camo.mailru.api.Account;
 import okhttp3.CookieJar;
@@ -59,9 +62,14 @@ public class MainActivity extends AppCompatActivity
                                 new SetCookieCache(),
                                 new SharedPrefsCookiePersistor(getApplicationContext())
                         );
-                Account account = new Account("***REMOVED***", "***REMOVED***", cookieJar);
-                account.Login();
-                account.getDiskUsage();
+                Account account = new Account("", "", cookieJar);
+                try {
+                    account.Login();
+                    account.getDiskUsage();
+                }
+                catch (IOException e){
+                    Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_LONG);
+                }
             }
         });
 

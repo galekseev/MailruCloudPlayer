@@ -60,7 +60,14 @@ public class Account {
         return AuthToken;
     }
 
-    public void Login() {
+    /**
+     * Logins to mail.ru cloud
+     *
+     * @throws IOException if the request could not be executed due to cancellation, a connectivity
+     * problem or timeout. Because networks can fail during an exchange, it is possible that the
+     * remote server accepted the request before the failure.
+     */
+    public void Login() throws IOException {
         Log.v(TAG, "Url: " + authUrl);
 
         RequestBody formBody = new FormBody.Builder()
@@ -78,26 +85,38 @@ public class Account {
 
         Log.v(TAG, "Request: " + request.toString());
 
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
+        Response response = okHttpClient.newCall(request).execute();
+        Log.v(TAG, "Got response!");
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                Log.v(TAG, "Got response!");
+        if (response.isSuccessful()) {
+            List<Cookie> cookies = CookieJar.loadForRequest(authUrl);
+            if (cookies.size() > 0) {
+                Log.v(TAG, "Successful login - phase 1");
+//                ensureSdcCookie();
+            } else
+                Log.v(TAG, "Failed to login - phase 1");
+        }
 
-                if (response.isSuccessful()) {
-                    List<Cookie> cookies = CookieJar.loadForRequest(authUrl);
-                    if (cookies.size() > 0) {
-                        Log.v(TAG, "Successful login - phase 1");
-                        ensureSdcCookie();
-                    } else
-                        Log.v(TAG, "Failed to login - phase 1");
-                }
-            }
-        });
+//        okHttpClient.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                Log.v(TAG, "Got response!");
+//
+//                if (response.isSuccessful()) {
+//                    List<Cookie> cookies = CookieJar.loadForRequest(authUrl);
+//                    if (cookies.size() > 0) {
+//                        Log.v(TAG, "Successful login - phase 1");
+//                        ensureSdcCookie();
+//                    } else
+//                        Log.v(TAG, "Failed to login - phase 1");
+//                }
+//            }
+//        });
     }
 
     private void ensureSdcCookie() {
@@ -216,9 +235,9 @@ public class Account {
         if (this.LoginName == null && this.Password == null)
             return false;
 
-        if (this.AuthToken == null || this.AuthToken.isEmpty()) {
-            Login();
-        }
+//        if (this.AuthToken == null || this.AuthToken.isEmpty()) {
+//            Login();
+//        }
 
         return true;
     }
