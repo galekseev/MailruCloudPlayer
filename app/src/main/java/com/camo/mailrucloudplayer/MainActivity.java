@@ -15,7 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 
+import com.franmontiel.persistentcookiejar.PersistentCookieJar;
+import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
+import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
+
 import camo.mailru.api.Account;
+import okhttp3.CookieJar;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -49,7 +54,12 @@ public class MainActivity extends AppCompatActivity
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
-                Account account = new Account("***REMOVED***", "***REMOVED***", getApplicationContext());
+                PersistentCookieJar cookieJar =
+                        new PersistentCookieJar(
+                                new SetCookieCache(),
+                                new SharedPrefsCookiePersistor(getApplicationContext())
+                        );
+                Account account = new Account("***REMOVED***", "***REMOVED***", cookieJar);
                 account.Login();
                 account.getDiskUsage();
             }

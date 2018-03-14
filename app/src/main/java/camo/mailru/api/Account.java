@@ -1,12 +1,6 @@
 package camo.mailru.api;
 
-import android.accounts.NetworkErrorException;
-import android.content.Context;
 import android.util.Log;
-
-import com.franmontiel.persistentcookiejar.PersistentCookieJar;
-import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
-import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,6 +8,7 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Cookie;
+import okhttp3.CookieJar;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -28,14 +23,12 @@ import okhttp3.RequestBody;
 public class Account {
 
     private static final String TAG = "camo.mailru.api.Account";
-//    public static final MediaType DEFAULT_MEDIA_TYPE
-//            = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
 
     private String LoginName;
     private String Password;
     private String AuthToken;
     private OkHttpClient okHttpClient;
-    private PersistentCookieJar cookieJar;
+    private CookieJar CookieJar;
     private final HttpUrl authUrl = new HttpUrl.Builder()
             .scheme("https")
             .host(ConstSettings.AUTH_DOMAIN)
@@ -43,15 +36,15 @@ public class Account {
             .addPathSegment("auth")
             .build();
 
-    public Account(String login, String password, Context context) {
+    public Account(String login, String password, CookieJar cookieJar) {
         LoginName = login;
         Password = password;
 
-        cookieJar =
-                new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(context));
+        CookieJar = cookieJar;
+                //new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(context));
 
         okHttpClient = new OkHttpClient.Builder()
-                .cookieJar(cookieJar)
+                .cookieJar(CookieJar)
                 .build();
     }
 
@@ -66,7 +59,6 @@ public class Account {
     public String getAuthToken() {
         return AuthToken;
     }
-//    public HashMap<HttpUrl, List<Cookie>> getCookieStore() { return cookieStore; }
 
     public void Login() {
         Log.v(TAG, "Url: " + authUrl);
@@ -97,7 +89,7 @@ public class Account {
                 Log.v(TAG, "Got response!");
 
                 if (response.isSuccessful()) {
-                    List<Cookie> cookies = cookieJar.loadForRequest(authUrl);
+                    List<Cookie> cookies = CookieJar.loadForRequest(authUrl);
                     if (cookies.size() > 0) {
                         Log.v(TAG, "Successful login - phase 1");
                         ensureSdcCookie();
