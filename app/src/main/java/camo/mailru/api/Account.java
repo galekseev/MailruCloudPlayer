@@ -2,9 +2,12 @@ package camo.mailru.api;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.util.List;
 
+import camo.mailru.api.json.AuthToken;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Cookie;
@@ -92,7 +95,7 @@ public class Account {
             List<Cookie> cookies = CookieJar.loadForRequest(authUrl);
             if (cookies.size() > 0) {
                 Log.v(TAG, "Successful login - phase 1");
-//                ensureSdcCookie();
+                ensureSdcCookie();
             } else
                 Log.v(TAG, "Failed to login - phase 1");
         }
@@ -119,7 +122,7 @@ public class Account {
 //        });
     }
 
-    private void ensureSdcCookie() {
+    private void ensureSdcCookie() throws IOException {
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
                 .host(ConstSettings.AUTH_DOMAIN)
@@ -133,27 +136,38 @@ public class Account {
                 .addHeader("Accept", ConstSettings.DEFAULT_ACCEPT_TYPE)
                 .build();
 
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
+        Response response = okHttpClient.newCall(request).execute();
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                Log.v(TAG, "Sdc call complete");
+        Log.v(TAG, "Sdc call complete");
 
-                if (response.isSuccessful()) {
-                    Log.v(TAG, "Successful login - phase 2");
-                    obtainAuthToken();
-                } else {
-                    Log.v(TAG, "Failed login - phase 2");
-                }
-            }
-        });
+        if (response.isSuccessful()) {
+            Log.v(TAG, "Successful login - phase 2");
+            obtainAuthToken();
+        } else {
+            Log.v(TAG, "Failed login - phase 2");
+        }
+
+//        okHttpClient.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                Log.v(TAG, "Sdc call complete");
+//
+//                if (response.isSuccessful()) {
+//                    Log.v(TAG, "Successful login - phase 2");
+//                    obtainAuthToken();
+//                } else {
+//                    Log.v(TAG, "Failed login - phase 2");
+//                }
+//            }
+//        });
     }
 
-    private void obtainAuthToken() {
+    private void obtainAuthToken() throws IOException {
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
                 .host(ConstSettings.CLOUD_DOMAIN)
@@ -169,23 +183,36 @@ public class Account {
                 .addHeader("Accept", "application/json")
                 .build();
 
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
+        Response response = okHttpClient.newCall(request).execute();
+        Log.v(TAG, "Auth token call complete");
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                Log.v(TAG, "Auth token call complete");
+        if (response.isSuccessful()) {
+            String json = response.body().string();
+            Gson gson = new Gson();
+            AuthToken token = gson.fromJson(json, camo.mailru.api.json.AuthToken.class);
+            AuthToken = token.body.token;
+            Log.v(TAG, "Successful login - phase 3");
+        } else {
+            Log.v(TAG, "Failed login - phase 3");
+        }
 
-                if (response.isSuccessful()) {
-                    Log.v(TAG, "Successful login - phase 3");
-                } else {
-                    Log.v(TAG, "Failed login - phase 3");
-                }
-            }
-        });
+//        okHttpClient.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                Log.v(TAG, "Auth token call complete");
+//
+//                if (response.isSuccessful()) {
+//                    Log.v(TAG, "Successful login - phase 3");
+//                } else {
+//                    Log.v(TAG, "Failed login - phase 3");
+//                }
+//            }
+//        });
     }
 
     public DiskUsage getDiskUsage() {

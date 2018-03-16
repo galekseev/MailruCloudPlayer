@@ -1,5 +1,7 @@
 package com.camo.mailrucloudplayer;
 
+import android.util.Log;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -23,8 +25,10 @@ public class AccountTests {
                         new MemoryCookiePersistor()
                 );
 
-        Account account = new Account("", "", cookieJar);
+        Account account = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_PASSWORD, cookieJar);
         account.Login();
+        String token = account.getAuthToken();
+        Log.v("TESTS", "auth token: " + token);
         assertNotNull(account.getAuthToken());
     }
 }
