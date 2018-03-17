@@ -7,7 +7,7 @@ package camo.mailru.api;
 public class FileSize {
 
     public FileSize(long defaultValue){
-        setDefaultValue(defaultValue);
+        setValue(defaultValue);
     }
 
     private long defValue = 0;
@@ -15,11 +15,11 @@ public class FileSize {
     /// Gets default size in bytes.
     /// </summary>
     /// <value>File size.</value>
-    public long getDefaultValue() {
+    public long getValue() {
         return this.defValue;
     }
 
-    public void setDefaultValue(long value) {
+    public void setValue(long value) {
         this.defValue = value;
         this.SetNormalizedValue();
     }

@@ -3,9 +3,6 @@ package camo.mailru.api;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
-import camo.mailru.api.json.AuthToken;
 
 public class JsonParser {
 
@@ -26,14 +23,24 @@ public class JsonParser {
         }
 
         Gson gson = new Gson();
-        AuthToken token = gson.fromJson(response, AuthToken.class);
-        Log.v("JsonParser", "status:"+token.status+" email:"+token.email+" token:"+token.body.token);
+
+        switch(parseObject){
+            case Token:
+                AuthToken jToken = gson.fromJson(response, AuthToken.class);
+                Log.v("JsonParser", jToken.toString());
+                return jToken;
+            case DiskUsage:
+                DiskUsage diskUsage = gson.fromJson(response, DiskUsage.class);
+                Log.v("JsonParser", diskUsage.toString());
+                return diskUsage;
+            default:
+                return null;
+        }
 
 //        try
 //        {
 //            //parsedJObject = JObject.Parse(response);
 //        }
 
-        return null;
     }
 }

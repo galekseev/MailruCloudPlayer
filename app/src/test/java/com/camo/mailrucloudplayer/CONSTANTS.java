@@ -5,6 +5,6 @@ package com.camo.mailrucloudplayer;
  */
 
 public class CONSTANTS {
-    public static final String TEST_LOGIN  = "";
-    public static final String TEST_PASSWORD  = "";
+    public static final String TEST_LOGIN  = "thor_2001@mail.ru";
+    public static final String TEST_PASSWORD  = "qoqtjoty";
 }

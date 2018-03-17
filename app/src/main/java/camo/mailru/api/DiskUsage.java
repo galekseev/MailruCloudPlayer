@@ -1,28 +1,46 @@
 package camo.mailru.api;
 
-/**
- * Created by GAlekseev on 12.03.2018.
- */
+import com.google.gson.annotations.SerializedName;
 
-public class DiskUsage {
+public class DiskUsage extends JsonResponse<DiskUsage.DiskUsageBody> {
 
-    private FileSize Total;
-    /// <summary>
-    /// Gets total disk size.
-    /// </summary>
-    public FileSize getTotal() { return Total; }
+    public FileSize getTotal(){
+        return new FileSize(getBody().total * 1024L * 1024L);
+    }
 
-    private FileSize Used;
-    /// <summary>
-    /// Gets used disk size.
-    /// </summary>
-    public FileSize getUsed() { return Used; }
+    public FileSize getUsed(){
+        return new FileSize(getBody().used * 1024L * 1024L);
+    }
 
-    /// <summary>
-    /// Gets free disk size.
-    /// </summary>
-    public FileSize getFree()
-    {
-        return new FileSize(this.Total.getDefaultValue() - this.Used.getDefaultValue());
+    public FileSize getFree(){
+        return new FileSize((getBody().total - getBody().used) * 1024L * 1024L);
+    }
+//    @Override
+//    public String toString() {
+//        return new ToStringBuilder(this).append("email", email).append("body", body).append("time", time).append("status", status).toString();
+//    }
+
+    public class DiskUsageBody {
+
+        @SerializedName("overquota")
+        public Boolean overquota;
+        @SerializedName("used")
+        public Long used;
+        @SerializedName("total")
+        public Long total;
+
+
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                    .append("{overquota:")
+                    .append(overquota)
+                    .append(",used:")
+                    .append(used)
+                    .append(",total:")
+                    .append(total)
+                    .append("}")
+                    .toString();
+        }
     }
 }

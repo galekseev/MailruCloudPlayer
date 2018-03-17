@@ -7,9 +7,6 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.List;
 
-import camo.mailru.api.json.AuthToken;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.FormBody;
@@ -72,6 +69,7 @@ public class Account {
      */
     public void Login() throws IOException {
         Log.v(TAG, "Url: " + authUrl);
+        Log.v(TAG, "login: " + LoginName);
 
         RequestBody formBody = new FormBody.Builder()
                 .addEncoded("Login", this.LoginName)
@@ -189,8 +187,8 @@ public class Account {
         if (response.isSuccessful()) {
             String json = response.body().string();
             Gson gson = new Gson();
-            AuthToken token = gson.fromJson(json, camo.mailru.api.json.AuthToken.class);
-            AuthToken = token.body.token;
+            camo.mailru.api.AuthToken token = gson.fromJson(json, camo.mailru.api.AuthToken.class);
+            AuthToken = token.getToken();
             Log.v(TAG, "Successful login - phase 3");
         } else {
             Log.v(TAG, "Failed login - phase 3");
@@ -215,9 +213,8 @@ public class Account {
 //        });
     }
 
-    public DiskUsage getDiskUsage() {
-        if (!this.checkAuth())
-            return null;
+    public DiskUsage getDiskUsage() throws IOException {
+        this.checkAuth();
 
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
@@ -237,34 +234,46 @@ public class Account {
                 .addHeader("Accept", "application/json")
                 .build();
 
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
+        Response response = okHttpClient.newCall(request).execute();
+        Log.v(TAG, "Disk usage call complete");
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                Log.v(TAG, "Disk usage call complete");
-
-                if (response.isSuccessful()) {
-                    Log.v(TAG, response.body().toString());
-                } else {
-                    Log.v(TAG, "Failed login - phase 3");
-                }
-            }
-        });
+        if (response.isSuccessful()) {
+            String json = response.body().string();
+            Gson gson = new Gson();
+            DiskUsage diskUsage = gson.fromJson(json, DiskUsage.class);
+            Log.v(TAG, "Successful got account info:" + diskUsage.toString());
+            return diskUsage;
+        } else {
+            Log.v(TAG, "Failed to get account info");
+        }
 
         return null;
+//        okHttpClient.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                Log.v(TAG, "Disk usage call complete");
+//
+//                if (response.isSuccessful()) {
+//                    Log.v(TAG, response.body().toString());
+//                } else {
+//                    Log.v(TAG, "Failed login - phase 3");
+//                }
+//            }
+//        });
     }
 
-    private boolean checkAuth() {
+    private boolean checkAuth() throws IOException {
         if (this.LoginName == null && this.Password == null)
             return false;
 
-//        if (this.AuthToken == null || this.AuthToken.isEmpty()) {
-//            Login();
-//        }
+        if (this.AuthToken == null || this.AuthToken.isEmpty()) {
+            Login();
+        }
 
         return true;
     }
