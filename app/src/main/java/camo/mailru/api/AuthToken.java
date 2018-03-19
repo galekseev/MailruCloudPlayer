@@ -21,7 +21,8 @@ public class AuthToken extends JsonResponse<AuthToken.AuthTokenBody> {
         public String toString(){
 
             return new StringBuilder()
-                    .append("{token:").append(token)
+                    .append("{token:")
+                    .append(token)
                     .append("}")
                     .toString();
 

@@ -45,6 +45,22 @@ public class AccountTests {
     }
 
     @Test
+    public void A1LoginFailTest() throws IOException {
+        PersistentCookieJar cookieJar =
+                new PersistentCookieJar(
+                        new SetCookieCache(),
+                        new MemoryCookiePersistor()
+                );
+
+        Account failAccount = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_WRONG_PASSWORD, cookieJar);
+        failAccount.Login();
+        String token = failAccount.getAuthToken();
+        Log.v("TESTS", "auth token: " + token);
+        assertNull(failAccount.getAuthToken());
+    }
+
+
+    @Test
     public void TestGettingAccountInfo() throws Exception {
         DiskUsage diskUsage = this.account.getDiskUsage();
         assertNotNull(diskUsage);
