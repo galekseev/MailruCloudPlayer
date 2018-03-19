@@ -17,12 +17,17 @@ import camo.mailru.api.DiskUsage;
 
 public class JsonTests {
     public static final String JSON_TOKEN = "{\"email\":\"thor_2001@mail.ru\",\"body\":{\"token\":\"biNGPZmZujKARX873cZGHXEbtmMpd2GW\"},\"time\":1521224562356,\"status\":200}";
+    public static final String JSON_TOKEN_DAMAGED_LESS1 = "{\"body\":{\"token\":\"biNGPZmZujKARX873cZGHXEbtmMpd2GW\"},\"time\":1521224562356,\"status\":200}";
+    public static final String JSON_TOKEN_DAMAGED_LESS2 = "{\"time\":1521224562356,\"status\":200}";
+    public static final String JSON_TOKEN_DAMAGED_MORE1 = "{\"shift\":false,\"time\":1521224562356,\"status\":200}";
+    public static final String JSON_TOKEN_DAMAGED_MORE2 = "{\"email\":\"thor_2001@mail.ru\",\"body\":{\"token\":\"biNGPZmZujKARX873cZGHXEbtmMpd2GW\",\"email\":\"thor_2001@mail.ru\"},\"time\":1521224562356,\"status2\":200}";
     public static final String JSON_DISK_USAGE = "{\"email\":\"thor_2001@mail.ru\",\"body\":{\"overquota\":false,\"used\":19426,\"total\":1048576},\"time\":1521312651784,\"status\":200}";
 
 
     @Test
     public void TestJSONTokenParse() {
         Object jobject = JsonParser.Parse(JSON_TOKEN, PObject.Token);
+        //Object jobject = JsonParser.Parse(JSON_TOKEN_DAMAGED_MORE2, PObject.Token);
         assertNotNull(jobject);
         AuthToken token = (AuthToken)jobject;
         assertEquals(token.getEmail(), "thor_2001@mail.ru");

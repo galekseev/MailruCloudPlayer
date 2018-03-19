@@ -36,7 +36,7 @@ public class JsonResponse<T> {
     public String toString() {
         return new StringBuilder()
                 .append("{email:").append(getEmail())
-                .append(",body:").append(body.toString())
+                .append(",body:").append(body != null ? body.toString() : null)
                 .append(",time:").append(getTime())
                 .append(",status:").append(getStatus())
                 .append("}")

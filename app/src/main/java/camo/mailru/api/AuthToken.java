@@ -19,7 +19,12 @@ public class AuthToken extends JsonResponse<AuthToken.AuthTokenBody> {
 
         @Override
         public String toString(){
-            return token;
+
+            return new StringBuilder()
+                    .append("{token:").append(token)
+                    .append("}")
+                    .toString();
+
         }
     }
 
