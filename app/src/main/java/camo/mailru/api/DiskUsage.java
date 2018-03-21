@@ -15,10 +15,6 @@ public class DiskUsage extends JsonResponse<DiskUsage.DiskUsageBody> {
     public FileSize getFree(){
         return new FileSize((getBody().total - getBody().used) * 1024L * 1024L);
     }
-//    @Override
-//    public String toString() {
-//        return new ToStringBuilder(this).append("email", email).append("body", body).append("time", time).append("status", status).toString();
-//    }
 
     public class DiskUsageBody {
 

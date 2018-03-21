@@ -5,9 +5,6 @@ import android.util.Log;
 import com.google.gson.Gson;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.ProxySelector;
 import java.util.List;
 
 import okhttp3.Cookie;
@@ -24,34 +21,34 @@ public class Account {
 
     private static final String TAG = "camo.mailru.api.Account";
 
-    private String LoginName;
-    private String Password;
-    private String AuthToken;
+    private String loginName;
+    private String password;
+    private String authToken;
     private OkHttpClient okHttpClient;
-    private CookieJar CookieJar;
+    private CookieJar cookieJar;
 
     public Account(String login, String password, CookieJar cookieJar) {
-        LoginName = login;
-        Password = password;
+        loginName = login;
+        this.password = password;
 
-        CookieJar = cookieJar;
+        this.cookieJar = cookieJar;
                 //new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(context));
 
         okHttpClient = new OkHttpClient.Builder()
-                .cookieJar(CookieJar)
+                .cookieJar(this.cookieJar)
                 .build();
     }
 
-    public String getLoginName() {
-        return LoginName;
+    public String getLogin() {
+        return loginName;
     }
 
     public String getPassword() {
-        return Password;
+        return password;
     }
 
     public String getAuthToken() {
-        return AuthToken;
+        return authToken;
     }
 
     /**
@@ -62,93 +59,73 @@ public class Account {
      * remote server accepted the request before the failure.
      */
     public boolean Login() throws IOException {
-        Request request = RequestBuilder.buildLoginRequest(this.LoginName, this.Password);
-        Response response = okHttpClient.newCall(request).execute();
+        //Build and execute request
+        Request request = RequestBuilder.buildLoginRequest(this.loginName, this.password);
+        Response response = executeRequest(request);
+        response.close();
 
-        if (response.isSuccessful()) {
-            List<Cookie> cookies = CookieJar.loadForRequest(RequestBuilder.getAuthUrl());
-            if (cookies.size() > 0) {
-                ensureSdcCookie();
-                obtainAuthToken();
-                return true;
-            }
+        List<Cookie> cookies = cookieJar.loadForRequest(RequestBuilder.getAuthUrl());
+        if (cookies.size() > 0) {
+            ensureSdcCookie();
+            return obtainAuthToken();
         }
 
         return false;
     }
 
     private void ensureSdcCookie() throws IOException {
-
+        //Build and execute request
         Request request = RequestBuilder.buildEnsureSdcCookieRequest();
+        Response response = executeRequest(request);
+        response.close();
+    }
+
+    private boolean obtainAuthToken() throws IOException {
+        //Build and execute request
+        Request request = RequestBuilder.buildAuthTokenRequest();
+        Response response = executeRequest(request);
+
+        //Parse json to get auth token
+        String json = response.body().string();
+        Gson gson = new Gson();
+        AuthToken token = gson.fromJson(json, AuthToken.class);
+        authToken = token.getToken();
+
+        return !(authToken == null || authToken.isEmpty());
+    }
+
+    private Response executeRequest(Request request) throws IOException{
         Response response = okHttpClient.newCall(request).execute();
 
         if (!response.isSuccessful()) {
-            throw new IOException("Unable to retrieve cookie");
-        }
-    }
-
-    private void obtainAuthToken() throws IOException {
-
-        Request request = RequestBuilder.buildAuthTokenRequest();
-        Response response = okHttpClient.newCall(request).execute();
-        Log.v(TAG, "Auth token call complete");
-
-        if (response.isSuccessful()) {
-            String json = response.body().string();
-            Gson gson = new Gson();
-            camo.mailru.api.AuthToken token = gson.fromJson(json, camo.mailru.api.AuthToken.class);
-            AuthToken = token.getToken();
-            Log.v(TAG, "Successful login - phase 3");
-        } else {
-            Log.v(TAG, "Failed login - phase 3");
+            int code = response.code();
+            response.close();
+            throw new IOException("Response failed with code: " + code);
         }
 
-//        okHttpClient.newCall(request).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                Log.v(TAG, "Auth token call complete");
-//
-//                if (response.isSuccessful()) {
-//                    Log.v(TAG, "Successful login - phase 3");
-//                } else {
-//                    Log.v(TAG, "Failed login - phase 3");
-//                }
-//            }
-//        });
+        return response;
     }
 
     public DiskUsage getDiskUsage() throws IOException {
-        this.checkAuth();
+        this.ensureAuth();
 
-        Request request = RequestBuilder.buildGetDiskUsageRequest(LoginName, getAuthToken());
-        Response response = okHttpClient.newCall(request).execute();
+        Request request = RequestBuilder.buildGetDiskUsageRequest(loginName, getAuthToken());
+        Response response = executeRequest(request);
 
-        if (response.isSuccessful()) {
-            String json = response.body().string();
-            Gson gson = new Gson();
-            DiskUsage diskUsage = gson.fromJson(json, DiskUsage.class);
-            Log.v(TAG, "Successful got account info:" + diskUsage.toString());
-            return diskUsage;
-        } else {
-            Log.v(TAG, "Failed to get account info");
-        }
-
-        return null;
+        String json = response.body().string();
+        Gson gson = new Gson();
+        DiskUsage diskUsage = gson.fromJson(json, DiskUsage.class);
+        Log.v(TAG, "Successful got account info:" + diskUsage.toString());
+        return diskUsage;
     }
 
-    private boolean checkAuth() throws IOException {
-        if (this.LoginName == null && this.Password == null)
-            return false;
+    private void ensureAuth() throws IOException {
+        if (this.loginName == null && this.password == null)
+            throw new IOException("Login or password is empty.");
 
-        if (this.AuthToken == null || this.AuthToken.isEmpty()) {
-            Login();
+        if (this.authToken == null || this.authToken.isEmpty()) {
+            if (!this.Login())
+                throw new IOException("Auth token has't been retrieved.");
         }
-
-        return true;
     }
 }

@@ -68,9 +68,5 @@ public class AccountTests {
             && diskUsage.getTotal().getValue() > 0L
             && diskUsage.getUsed().getValue() > 0L
         );
-//        Assert.IsTrue(diskUsage.Free.DefaultValue > 0L
-//                && diskUsage.Total.DefaultValue > 0L
-//                && diskUsage.Used.DefaultValue > 0L);
-
     }
 }
