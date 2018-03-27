@@ -119,7 +119,7 @@ public class Account {
         return diskUsage;
     }
 
-    private void ensureAuth() throws IOException {
+    public void ensureAuth() throws IOException {
         if (this.loginName == null && this.password == null)
             throw new IOException("Login or password is empty.");
 

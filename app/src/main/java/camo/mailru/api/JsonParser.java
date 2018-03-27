@@ -33,6 +33,9 @@ public class JsonParser {
                 DiskUsage diskUsage = gson.fromJson(response, DiskUsage.class);
                 Log.v("JsonParser", diskUsage.toString());
                 return diskUsage;
+            case Entry:
+                FolderJson folder = gson.fromJson(response, FolderJson.class);
+                return folder;
             default:
                 return null;
         }

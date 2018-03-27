@@ -119,4 +119,24 @@ public class RequestBuilder {
 
         return request;
     }
+
+    public static Request buildGetItemRequest(String path, String token) {
+        HttpUrl url = new HttpUrl.Builder()
+                .scheme("https")
+                .host(CLOUD_DOMAIN)
+                .addPathSegment("api")
+                .addPathSegment("v2")
+                .addPathSegment("folder")
+                .addQueryParameter("token", token)
+                .addQueryParameter("home", path)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .header("User-Agent", USER_AGENT)
+                .addHeader("Accept", "application/json")
+                .build();
+
+        return request;
+    }
 }

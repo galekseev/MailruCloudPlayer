@@ -3,7 +3,7 @@ package camo.mailru.api;
 import java.util.List;
 
 /**
- * Server file info.
+ * Server folder/file info.
  */
 public class Folder
 {
