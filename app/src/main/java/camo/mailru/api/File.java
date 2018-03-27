@@ -2,45 +2,49 @@ package camo.mailru.api;
 
 import java.util.Date;
 
-/// <summary>
-/// Server file info.
-/// </summary>
+/**
+ * Server file info.
+ */
 public class File
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="File" /> class.
-    /// </summary>
+    /**
+     * Initializes a new instance of the File class.
+     */
     public File()
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="File" /> class.
-    /// </summary>
-    /// <param name="name">Folder name.</param>
-    /// <param name="fullPath">Full folder path.</param>
+    /**
+     * Initializes a new instance of the File class.
+     *
+     * @param name Folder name.
+     * @param fullPath Full folder path.
+     */
     public File(String name, String fullPath)
     {
         this.Name = name;
         this.FullPath = fullPath;
     }
 
-    /// <summary>
-    /// Gets file name.
-    /// </summary>
-    /// <value>File name.</value>
     private String Name;
+    /**
+     * Gets file name.
+     *
+     * @return File name.
+     */
     public String getName() {
         return Name;
     }
     void setName(String name) {
         Name = name;
     }
-    /// <summary>
-    /// Gets file hash value.
-    /// </summary>
-    /// <value>File hash.</value>
+
     private String Hash;
+    /**
+     * Gets file hash value.
+     *
+     * @return File hash.
+     */
     public  String getHash() {
         return Hash;
     }
@@ -48,11 +52,12 @@ public class File
         Hash = hash;
     }
 
-    /// <summary>
-    /// Gets file size.
-    /// </summary>
-    /// <value>File size.</value>
     private FileSize Size;
+    /**
+     * Gets file size.
+     *
+     * @return File size.
+     */
     public FileSize getSize() {
         return Size;
     }
@@ -60,11 +65,12 @@ public class File
         Size = size;
     }
 
-    /// <summary>
-    /// Gets full file path with name in server.
-    /// </summary>
-    /// <value>Full file path.</value>
     private String FullPath;
+    /**
+     * Gets full file path with name in server.
+     *
+     * @return Full file path.
+     */
     public String getFullPath() {
         return FullPath;
     }
@@ -72,11 +78,12 @@ public class File
         FullPath = fullPath;
     }
 
-    /// <summary>
-    /// Gets public file link.
-    /// </summary>
-    /// <value>Public link.</value>
     private String PublicLink;
+    /**
+     * Gets public file link.
+     *
+     * @return Public link.
+     */
     public String getPublicLink() {
         return PublicLink;
     }
@@ -84,10 +91,12 @@ public class File
         PublicLink = publicLink;
     }
 
-    /// <summary>
-    /// Gets cloud file type.
-    /// </summary>
     private FileType Type;
+    /**
+     * Gets cloud file type.
+     *
+     * @return Cloud file type.
+     */
     public FileType getType() {
         return Type;
     }
@@ -95,10 +104,12 @@ public class File
         Type = type;
     }
 
-    /// <summary>
-    /// Gets last modified time of file in UTC format.
-    /// </summary>
     private Date LastModifiedTimeUTC;
+    /**
+     * Gets last modified time of file in UTC format.
+     *
+     * @return Last modified date in UTC format
+     */
     public Date getLastModifiedTimeUTC() {
         return LastModifiedTimeUTC;
     }
@@ -106,14 +117,13 @@ public class File
         LastModifiedTimeUTC = lastModifiedTimeUTC;
     }
 
-    /// <summary>
-    /// Gets or sets base file name.
-    /// </summary>
+    /**
+     * Gets or sets base file name.
+     */
     String PrimaryName;
 
-    /// <summary>
-    /// Gets or sets base file size.
-    /// </summary>
-    /// <value>File size.</value>
+    /**
+     * File size.
+     */
     FileSize PrimarySize;
 }

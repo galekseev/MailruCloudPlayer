@@ -1,16 +1,5 @@
 package camo.mailru.api;
 
-/**
- * Created by GAlekseev on 26.03.2018.
- */
-
-//-----------------------------------------------------------------------
-// <created file="Folder.cs">
-//     Mail.ru cloud client created in 2016.
-// </created>
-// <author>Korolev Erast.</author>
-//-----------------------------------------------------------------------
-
 import java.util.List;
 
 /**
@@ -65,11 +54,12 @@ public class Folder
         this.PublicLink = publicLink;
     }
 
+    private int NumberOfFolders;
     /**
      * Gets number of the folders.
+     *
+     * @return Number of the folders.
      */
-    private int NumberOfFolders;
-
     public int getNumberOfFolders() {
         return NumberOfFolders;
     }
@@ -88,11 +78,11 @@ public class Folder
         NumberOfFiles = numberOfFiles;
     }
 
+
+    private List<Folder> Folders;
     /**
      * Gets list of the folders with their specification.
      */
-    public List<Folder> Folders;
-
     public List<Folder> getFolders() {
         return Folders;
     }
@@ -100,10 +90,10 @@ public class Folder
         Folders = folders;
     }
 
-    /// <summary>
-    /// Gets list of the files with their specification.
-    /// </summary>
-    public List<File> Files;
+    private List<File> Files;
+    /**
+     * Gets list of the files with their specification.
+     */
     public List<File> getFiles() {
         return Files;
     }
@@ -111,10 +101,10 @@ public class Folder
         Files = files;
     }
 
-    /// <summary>
-    /// Gets full entry path on the server.
-    /// </summary>
-    public String FullPath;
+    /**
+     * Gets full entry path on the server.
+     */
+    private String FullPath;
     public String getFullPath() {
         return FullPath;
     }
@@ -122,10 +112,10 @@ public class Folder
         FullPath = fullPath;
     }
 
-    /// <summary>
-    /// Gets entry kind.
-    /// </summary>
-    public String Kind;
+    /**
+     * Gets entry kind.
+     */
+    private String Kind;
     public String getKind() {
         return Kind;
     }
@@ -133,10 +123,10 @@ public class Folder
         Kind = kind;
     }
 
-    /// <summary>
-    /// Gets entry type.
-    /// </summary>
-    public String Type;
+    /**
+     * Gets entry type.
+     */
+    private String Type;
     public String getType() {
         return Type;
     }
@@ -144,11 +134,12 @@ public class Folder
         Type = type;
     }
 
-    /// <summary>
-    /// Gets folder name.
-    /// </summary>
-    /// <value>Folder name.</value>
-    public String Name;
+    private String Name;
+    /*
+     * Gets folder name.
+     *
+     * @return Folder name.
+     */
     public String getName() {
         return Name;
     }
@@ -156,11 +147,12 @@ public class Folder
         Name = name;
     }
 
-    /// <summary>
-    /// Gets folder size.
-    /// </summary>
-    /// <value>Folder size.</value>
-    public FileSize Size;
+    private FileSize Size;
+    /**
+     * Gets folder size.
+     *
+     * @return Folder size.
+     */
     public FileSize getSize() {
         return Size;
     }
@@ -168,11 +160,12 @@ public class Folder
         Size = size;
     }
 
-    /// <summary>
-    /// Gets public folder link.
-    /// </summary>
-    /// <value>Public link.</value>
-    public String PublicLink;
+    private String PublicLink;
+    /**
+     * Gets public folder link.
+     *
+     * @return Public link.
+     */
     public String getPublicLink() {
         return PublicLink;
     }
@@ -180,11 +173,12 @@ public class Folder
         PublicLink = publicLink;
     }
 
-    /// <summary>
-    /// Get folder revision number
-    /// </summary>
-    /// <value>Revision number</value>
-    public int Revision;
+    private int Revision;
+    /**
+     * Get folder revision number
+     *
+     * @return Revision number
+     */
     public int getRevision() {
         return Revision;
     }
@@ -192,11 +186,12 @@ public class Folder
         Revision = revision;
     }
 
-    /// <summary>
-    /// Gets folder global revision number
-    /// </summary>
-    /// <value>Global revision number</value>
-    public int GlobalRevision;
+    private int GlobalRevision;
+    /**
+     * Gets folder global revision number
+     *
+     * @return Global revision number
+     */
     public int getGlobalRevision() {
         return GlobalRevision;
     }
@@ -204,6 +199,11 @@ public class Folder
         GlobalRevision = globalRevision;
     }
 
+    /**
+     * Gets status if folder contents require update
+     *
+     * @return true - if folder contents require update from server, false - otherwise
+     */
     public boolean requiresUpdate(Folder folder)
     {
         return this.GlobalRevision != folder.GlobalRevision;

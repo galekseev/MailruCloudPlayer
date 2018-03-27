@@ -4,9 +4,9 @@ package camo.mailru.api;
  * Created by GAlekseev on 26.03.2018.
  */
 
-/// <summary>
-/// Cloud file type.
-/// </summary>
+/**
+ * Cloud file type.
+ */
 public enum FileType
 {
     /**

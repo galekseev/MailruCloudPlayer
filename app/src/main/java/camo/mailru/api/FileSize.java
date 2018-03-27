@@ -1,9 +1,9 @@
 package camo.mailru.api;
 
 
-/// <summary>
-/// File size definition.
-/// </summary>
+/**
+ * File size definition.
+ */
 public class FileSize {
 
     public FileSize(long defaultValue){
@@ -11,10 +11,11 @@ public class FileSize {
     }
 
     private long defValue = 0;
-    /// <summary>
-    /// Gets default size in bytes.
-    /// </summary>
-    /// <value>File size.</value>
+    /**
+     * Gets default size in bytes.
+     *
+     * @return File size.
+     */
     public long getValue() {
         return this.defValue;
     }
@@ -25,25 +26,26 @@ public class FileSize {
     }
 
     private float NormalizedValue;
-    /// <summary>
-    /// Gets normalized  file size, auto detect storage unit.
-    /// </summary>
-    /// <value>File size.</value>
+    /**
+     * Gets normalized  file size, auto detect storage unit.
+     *
+     * @return File size.
+     */
     public float getNormalizedValue() {
         return NormalizedValue;
     }
 
     private StorageUnit NormalizedType;
-    /// <summary>
-    /// Gets auto detected storage unit by normalized value.
-    /// </summary>
+    /**
+     * Gets auto detected storage unit by normalized value.
+     */
     public StorageUnit getNormalizedType() {
         return NormalizedType;
     }
 
-    /// <summary>
-    /// Normalized value detection and auto detection storage unit.
-    /// </summary>
+    /**
+     * Normalized value detection and auto detection storage unit.
+     */
     private void SetNormalizedValue() {
         if (this.defValue < 1024L) {
             this.NormalizedType = StorageUnit.Byte;
