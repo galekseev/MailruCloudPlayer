@@ -1,11 +1,10 @@
 package camo.mailru.api;
 
-import com.franmontiel.persistentcookiejar.PersistentCookieJar;
-import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
-import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
-
 import java.io.IOException;
 
+import camo.mailru.api.json.Folder;
+import camo.mailru.api.json.JsonObjectType;
+import camo.mailru.api.json.JsonParser;
 import okhttp3.CookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -54,7 +53,7 @@ public class MailruCloud {
         Response response = executeRequest(request);
 
         String json = response.body().string();
-        Folder entry = (Folder)JsonParser.Parse(json, PObject.Entry);
+        Folder entry = (Folder) JsonParser.Parse(json, JsonObjectType.Entry);
 
         return entry;
     }

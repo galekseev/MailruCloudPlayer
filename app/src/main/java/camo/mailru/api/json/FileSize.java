@@ -1,4 +1,4 @@
-package camo.mailru.api;
+package camo.mailru.api.json;
 
 
 /**

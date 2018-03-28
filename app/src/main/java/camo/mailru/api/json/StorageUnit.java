@@ -1,4 +1,4 @@
-package camo.mailru.api;
+package camo.mailru.api.json;
 
 /**
  * Created by GAlekseev on 12.03.2018.

@@ -1,20 +1,22 @@
-package camo.mailru.api;
+package camo.mailru.api.json;
 
 import com.google.gson.annotations.SerializedName;
 
 public class DiskUsage extends JsonResponse<DiskUsage.DiskUsageBody> {
 
     public FileSize getTotal(){
-        return new FileSize(getBody().total * 1024L * 1024L);
+        return new FileSize(body().total * 1024L * 1024L);
     }
 
     public FileSize getUsed(){
-        return new FileSize(getBody().used * 1024L * 1024L);
+        return new FileSize(body().used * 1024L * 1024L);
     }
 
     public FileSize getFree(){
-        return new FileSize((getBody().total - getBody().used) * 1024L * 1024L);
+        return new FileSize((body().total - body().used) * 1024L * 1024L);
     }
+
+    public boolean getOverquota() { return body().overquota; }
 
     public class DiskUsageBody {
 
@@ -24,7 +26,6 @@ public class DiskUsage extends JsonResponse<DiskUsage.DiskUsageBody> {
         public Long used;
         @SerializedName("total")
         public Long total;
-
 
         @Override
         public String toString() {

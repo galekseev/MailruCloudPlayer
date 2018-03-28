@@ -13,7 +13,7 @@ import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import java.io.IOException;
 
 import camo.mailru.api.Account;
-import camo.mailru.api.DiskUsage;
+import camo.mailru.api.json.DiskUsage;
 
 /**
  * Created by GAlekseev on 15.03.2018.

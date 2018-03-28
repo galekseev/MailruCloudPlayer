@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.List;
 
+import camo.mailru.api.json.AuthToken;
+import camo.mailru.api.json.DiskUsage;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.OkHttpClient;

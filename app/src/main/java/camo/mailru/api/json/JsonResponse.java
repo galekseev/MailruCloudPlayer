@@ -3,7 +3,7 @@
  */
 
 
-package camo.mailru.api;
+package camo.mailru.api.json;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.Date;
@@ -30,7 +30,7 @@ public class JsonResponse<T> {
         return status;
     }
 
-    public T getBody(){ return body; }
+    T body(){ return body; }
 
     @Override
     public String toString() {

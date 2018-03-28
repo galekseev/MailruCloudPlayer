@@ -1,4 +1,4 @@
-package camo.mailru.api;
+package camo.mailru.api.json;
 
 /**
  * Created by AlekseevGA on 16.03.2018.
@@ -7,7 +7,7 @@ package camo.mailru.api;
 /// <summary>
 /// Object to response parsing.
 /// </summary>
-public enum PObject
+public enum JsonObjectType
 {
     /// <summary>
     /// Authorization token.

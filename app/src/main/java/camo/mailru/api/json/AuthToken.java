@@ -1,4 +1,4 @@
-package camo.mailru.api;
+package camo.mailru.api.json;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
 public class AuthToken extends JsonResponse<AuthToken.AuthTokenBody> {
 
     public String getToken(){
-        return getBody().token;
+        return body().token;
     }
 
     public class AuthTokenBody {
