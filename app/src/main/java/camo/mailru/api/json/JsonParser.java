@@ -23,6 +23,8 @@ public class JsonParser {
             return null;
         }
 
+        //TODO: Add status code check. If status code isn't successfull - do not parse
+
         Gson gson = null;
 
         switch(parseObject){
@@ -46,11 +48,6 @@ public class JsonParser {
             default:
                 return null;
         }
-
-//        try
-//        {
-//            //parsedJObject = JObject.Parse(response);
-//        }
 
     }
 }

@@ -33,7 +33,7 @@ public class RequestBuilder {
             .addPathSegment("auth")
             .build();
 
-    public static final HttpUrl getAuthUrl(){
+    public static HttpUrl getAuthUrl(){
         return authUrl;
     }
 

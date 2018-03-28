@@ -26,7 +26,7 @@ public class AccountTests {
     private Account account = null;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         PersistentCookieJar cookieJar =
                 new PersistentCookieJar(
                         new SetCookieCache(),

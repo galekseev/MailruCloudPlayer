@@ -1,6 +1,5 @@
 package com.camo.mailrucloudplayer;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,7 +22,6 @@ import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersisto
 import java.io.IOException;
 
 import camo.mailru.api.Account;
-import okhttp3.CookieJar;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -68,7 +66,7 @@ public class MainActivity extends AppCompatActivity
                     account.getDiskUsage();
                 }
                 catch (IOException e){
-                    Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_LONG);
+                    Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         });

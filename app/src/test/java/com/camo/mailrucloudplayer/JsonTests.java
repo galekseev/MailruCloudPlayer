@@ -2,9 +2,6 @@ package com.camo.mailrucloudplayer;
 
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -14,8 +11,6 @@ import camo.mailru.api.json.JsonParser;
 import camo.mailru.api.json.AuthToken;
 import camo.mailru.api.json.DiskUsage;
 import camo.mailru.api.json.Folder;
-import camo.mailru.api.json.EntriesListDeserializer;
-import camo.mailru.api.json.EntriesList;
 
 /**
  * Created by AlekseevGA on 16.03.2018.

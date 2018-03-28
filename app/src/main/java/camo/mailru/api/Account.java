@@ -23,8 +23,8 @@ public class Account {
 
     private static final String TAG = "camo.mailru.api.Account";
 
-    private String loginName;
-    private String password;
+    private final String loginName;
+    private final String password;
     private String authToken;
     private OkHttpClient okHttpClient;
     private CookieJar cookieJar;
