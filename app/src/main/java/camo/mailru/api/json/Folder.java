@@ -63,7 +63,7 @@ public class Folder extends JsonResponse<FolderMeta> {
         return new FileSize(body().size);
     }
 
-    /*
+    /**
      * Gets folder name.
      */
     public String getName() {

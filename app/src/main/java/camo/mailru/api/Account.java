@@ -130,4 +130,8 @@ public class Account {
                 throw new IOException("Auth token has't been retrieved.");
         }
     }
+
+    public CookieJar getCookieJar() {
+        return this.cookieJar;
+    }
 }

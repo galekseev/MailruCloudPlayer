@@ -19,11 +19,10 @@ import camo.mailru.api.json.DiskUsage;
  * Created by GAlekseev on 15.03.2018.
  */
 
-
-
 public class AccountTests {
 
     private Account account = null;
+    private Account failAccount = null;
 
     @Before
     public void setUp() {
@@ -34,6 +33,8 @@ public class AccountTests {
                 );
 
         account = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_PASSWORD, cookieJar);
+
+        failAccount = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_WRONG_PASSWORD, cookieJar);
     }
 
     @Test
@@ -46,13 +47,6 @@ public class AccountTests {
 
     @Test
     public void A1LoginFailTest() throws IOException {
-        PersistentCookieJar cookieJar =
-                new PersistentCookieJar(
-                        new SetCookieCache(),
-                        new MemoryCookiePersistor()
-                );
-
-        Account failAccount = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_WRONG_PASSWORD, cookieJar);
         failAccount.Login();
         String token = failAccount.getAuthToken();
         Log.v("TESTS", "auth token: " + token);
@@ -61,12 +55,23 @@ public class AccountTests {
 
 
     @Test
-    public void TestGettingAccountInfo() throws Exception {
+    public void testGettingAccountInfo() throws Exception {
         DiskUsage diskUsage = this.account.getDiskUsage();
         assertNotNull(diskUsage);
         assertTrue(diskUsage.getFree().getValue()> 0L
             && diskUsage.getTotal().getValue() > 0L
             && diskUsage.getUsed().getValue() > 0L
         );
+    }
+
+    @Test
+    public void testFailGetAccountInfo() throws Exception {
+        try {
+            DiskUsage diskUsage = this.failAccount.getDiskUsage();
+            fail("Login didn't fail as expected");
+        }
+        catch (IOException e){
+            assertEquals(e.getMessage(), "Auth token has't been retrieved.");
+        }
     }
 }
