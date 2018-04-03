@@ -111,7 +111,7 @@ public class Account {
         return response;
     }
 
-    public DiskUsage diskUsage() throws IOException {
+    public DiskUsage getDiskUsage() throws IOException {
         this.ensureAuth();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -120,21 +120,9 @@ public class Account {
                 .client(okHttpClient)
                 .build();
 
-
         CloudApi api = retrofit.create(CloudApi.class);
         Call<DiskUsage> call = api.getDiskUsage(2, loginName, getAuthToken());
-        return call.execute().body();
-    }
-
-    public DiskUsage getDiskUsage() throws IOException {
-        this.ensureAuth();
-
-        Request request = RequestBuilder.buildGetDiskUsageRequest(loginName, getAuthToken());
-        Response response = executeRequest(request);
-
-        String json = response.body().string();
-        Gson gson = new Gson();
-        DiskUsage diskUsage = gson.fromJson(json, DiskUsage.class);
+        DiskUsage diskUsage = call.execute().body();
         Log.v(TAG, "Successful got account info:" + diskUsage.toString());
         return diskUsage;
     }
