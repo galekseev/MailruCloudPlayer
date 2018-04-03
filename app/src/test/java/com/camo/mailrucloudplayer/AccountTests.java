@@ -65,6 +65,17 @@ public class AccountTests {
     }
 
     @Test
+    public void testGettingAccountInfoApi() throws Exception {
+        DiskUsage diskUsage = this.account.diskUsage();
+        assertNotNull(diskUsage);
+        assertTrue(diskUsage.getFree().getValue()> 0L
+                && diskUsage.getTotal().getValue() > 0L
+                && diskUsage.getUsed().getValue() > 0L
+        );
+    }
+
+
+    @Test
     public void testFailGetAccountInfo() throws Exception {
         try {
             DiskUsage diskUsage = this.failAccount.getDiskUsage();

@@ -12,6 +12,7 @@ import java.io.IOException;
 import camo.mailru.api.Account;
 import camo.mailru.api.MailruCloud;
 import camo.mailru.api.json.Folder;
+import camo.mailru.api.json.FolderMeta;
 
 public class ApiTests {
     private Account account = null;
@@ -47,6 +48,12 @@ public class ApiTests {
             assertEquals(e.getMessage(), "Response failed with code: 404");
         }
 
+    }
+
+    @Test
+    public void testGetFolderTree() throws IOException {
+        Folder folder = api.GetFoldersTreeAsync(MailruCloud.CLOUD_ROOT_FOLDER);
+        assertEquals(folder.getName(), "/");
     }
 
 }

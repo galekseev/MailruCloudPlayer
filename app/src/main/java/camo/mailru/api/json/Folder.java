@@ -101,4 +101,10 @@ public class Folder extends JsonResponse<FolderMeta> {
     }
 
 
+    public void updateFolders(List<Folder> folders) {
+        this.body().list.folders.clear();
+        for (Folder folder : folders) {
+            this.body().list.folders.add(folder.body());
+        }
+    }
 }

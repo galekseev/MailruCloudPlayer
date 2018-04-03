@@ -19,7 +19,7 @@ import okhttp3.Response;
 
 public class MailruCloud {
 
-    private static final String CLOUD_ROOT_FOLDER = "/";
+    public static final String CLOUD_ROOT_FOLDER = "/";
 
     private Account account = null;
     private OkHttpClient okHttpClient = null;
@@ -90,26 +90,26 @@ public class MailruCloud {
     public Folder GetFoldersTreeAsync(String root) throws IOException
     {
         Folder entry = getItem(root);
-        return GetFoldersTreeAsync(entry);
+        Folder tree = GetFoldersTreeAsync(entry);
+        return tree;
     }
 
     public Folder GetFoldersTreeAsync(Folder root) throws IOException
     {
         //TODO Create implementation
-        return null;
-//        List<Folder> folders = new ArrayList<>();
-//
-//        for (FolderMeta folder : root.getFolders())
-//        {
-//            FolderMeta entry = getItem(folder);
-//            Folder newfolder = GetFoldersTreeAsync(entry);
-//            folders.add(newfolder);
-//        }
-//
-//        root.getFolders().clear();
-//        root.getFolders().addAll(folders);
-//
-//        return root;
+//        return null;
+        List<Folder> folders = new ArrayList<>();
+
+        for (FolderMeta folder : root.getFolders())
+        {
+            Folder entry = getItem(folder.home);
+            Folder new_folder = GetFoldersTreeAsync(entry);
+            folders.add(new_folder);
+        }
+
+        root.updateFolders(folders);
+
+        return root;
     }
 
     private Response executeRequest(Request request) throws IOException{
