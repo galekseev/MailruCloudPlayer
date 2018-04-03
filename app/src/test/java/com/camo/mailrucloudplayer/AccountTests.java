@@ -33,7 +33,6 @@ public class AccountTests {
                 );
 
         account = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_PASSWORD, cookieJar);
-
         failAccount = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_WRONG_PASSWORD, cookieJar);
     }
 
@@ -63,17 +62,6 @@ public class AccountTests {
             && diskUsage.getUsed().getValue() > 0L
         );
     }
-
-    @Test
-    public void testGettingAccountInfoApi() throws Exception {
-        DiskUsage diskUsage = this.account.diskUsage();
-        assertNotNull(diskUsage);
-        assertTrue(diskUsage.getFree().getValue()> 0L
-                && diskUsage.getTotal().getValue() > 0L
-                && diskUsage.getUsed().getValue() > 0L
-        );
-    }
-
 
     @Test
     public void testFailGetAccountInfo() throws Exception {
