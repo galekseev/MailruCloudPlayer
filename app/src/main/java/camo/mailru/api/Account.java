@@ -26,14 +26,11 @@ public class Account {
 
     private static final String TAG = "camo.mailru.api.Account";
 
-    private final String loginName;
-    private final String password;
-    private String authToken;
     private OkHttpClient okHttpClient;
     private CookieJar cookieJar;
 
     public Account(String login, String password, CookieJar cookieJar) {
-        loginName = login;
+        this.loginName = login;
         this.password = password;
 
         this.cookieJar = cookieJar;
@@ -43,6 +40,11 @@ public class Account {
                 .cookieJar(this.cookieJar)
                 .build();
     }
+
+    //region public properties
+    private final String loginName;
+    private final String password;
+    private String authToken;
 
     public String getLogin() {
         return loginName;
@@ -55,6 +57,7 @@ public class Account {
     public String getAuthToken() {
         return authToken;
     }
+    //endregion
 
     /**
      * Logins to mail.ru cloud
@@ -114,13 +117,15 @@ public class Account {
     public DiskUsage getDiskUsage() throws IOException {
         this.ensureAuth();
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://cloud.mail.ru/api/v2/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(okHttpClient)
-                .build();
+        CloudApi api = MailruApiService.createService(CloudApi.class);
 
-        CloudApi api = retrofit.create(CloudApi.class);
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .baseUrl("https://cloud.mail.ru/api/v2/")
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .client(okHttpClient)
+//                .build();
+//
+//        CloudApi api = retrofit.create(CloudApi.class);
         Call<DiskUsage> call = api.getDiskUsage(2, loginName, getAuthToken());
         DiskUsage diskUsage = call.execute().body();
         Log.v(TAG, "Successful got account info:" + diskUsage.toString());

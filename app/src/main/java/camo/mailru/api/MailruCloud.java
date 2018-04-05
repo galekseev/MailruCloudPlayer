@@ -22,6 +22,7 @@ public class MailruCloud {
     public static final String CLOUD_ROOT_FOLDER = "/";
 
     private Account account = null;
+    private CloudApi api = null;
     private OkHttpClient okHttpClient = null;
 
     /**
@@ -30,20 +31,8 @@ public class MailruCloud {
     public MailruCloud(String login, String password, CookieJar cookieJar){
         this.account = new Account(login, password, cookieJar);
 
-        okHttpClient = new OkHttpClient.Builder()
-                .cookieJar(this.account.getCookieJar())
-                .build();
-    }
-
-    /**
-     * Initializes a new instance of the MailruCloud class.
-     */
-    public MailruCloud(Account account){
-        this.account = account;
-
-        okHttpClient = new OkHttpClient.Builder()
-                .cookieJar(this.account.getCookieJar())
-                .build();
+        MailruApiService.build(cookieJar);
+        api = MailruApiService.createService(CloudApi.class);
     }
 
     public boolean Login() throws IOException{
@@ -57,19 +46,20 @@ public class MailruCloud {
      * @return Folder for requested path.
      */
     public Folder getItem(String path) throws IOException{
+
         this.account.ensureAuth();
 
-        if (path == null || path.isEmpty())
-            path = "/";
+        path = Utils.IsNullOrEmpty(path) ? CLOUD_ROOT_FOLDER : path;
 
-
-        Request request = RequestBuilder.buildGetItemRequest(path, account.getAuthToken());
-        Response response = executeRequest(request);
-
-        String json = response.body().string();
-        Folder entry = (Folder)JsonParser.Parse(json, JsonObjectType.Entry);
-
+        Folder entry = api.getFolder(path, account.getAuthToken()).execute().body();
         return entry;
+
+//        Request request = RequestBuilder.buildGetItemRequest(path, account.getAuthToken());
+//        Response response = executeRequest(request);
+
+//        String json = response.body().string();
+//        Folder entry = (Folder)JsonParser.Parse(json, JsonObjectType.Entry);
+
     }
 
     /**
@@ -77,7 +67,7 @@ public class MailruCloud {
      *
      * @return Root folder.
      */
-    public Folder getRoot() throws IOException{
+    public Folder getRoot() throws IOException {
         return getItem(CLOUD_ROOT_FOLDER);
     }
 
@@ -87,8 +77,7 @@ public class MailruCloud {
      * @param root Path to specific folder.
      * @return Latest copy of folder info and structure
      */
-    public Folder GetFoldersTreeAsync(String root) throws IOException
-    {
+    public Folder GetFoldersTreeAsync(String root) throws IOException {
         Folder entry = getItem(root);
         Folder tree = GetFoldersTreeAsync(entry);
         return tree;
@@ -96,8 +85,6 @@ public class MailruCloud {
 
     public Folder GetFoldersTreeAsync(Folder root) throws IOException
     {
-        //TODO Create implementation
-//        return null;
         List<Folder> folders = new ArrayList<>();
 
         for (FolderMeta folder : root.getFolders())

@@ -15,7 +15,7 @@ public class MailruApiService {
                     .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create());
 
-    private static Retrofit retrofit = builder.build();
+    private static Retrofit retrofit = null;
 
     private static OkHttpClient.Builder httpClient =
             new OkHttpClient.Builder();
@@ -24,24 +24,22 @@ public class MailruApiService {
             new HttpLoggingInterceptor()
                     .setLevel(HttpLoggingInterceptor.Level.NONE);
 
-    public static void setCookieJar(CookieJar cookieJar){
+    public static void build(CookieJar cookieJar){
+        build(cookieJar, HttpLoggingInterceptor.Level.NONE);
+    }
+
+    public static void build(CookieJar cookieJar, HttpLoggingInterceptor.Level level){
         httpClient.cookieJar(cookieJar);
-    }
 
-    public static void setLogging(HttpLoggingInterceptor.Level level){
-        logging.setLevel(level);
-    }
-
-    public static void init(){
         if (!httpClient.interceptors().contains(logging)) {
             httpClient.addInterceptor(logging);
-            builder.client(httpClient.build());
-            retrofit = builder.build();
         }
+
+        builder.client(httpClient.build());
+        retrofit = builder.build();
     }
 
-    public static <S> S createService(
-            Class<S> serviceClass) {
+    public static <S> S createService(Class<S> serviceClass) {
         return retrofit.create(serviceClass);
     }
 }
