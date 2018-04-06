@@ -22,6 +22,8 @@ import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersisto
 import java.io.IOException;
 
 import camo.mailru.api.Account;
+import camo.mailru.api.ApiService;
+import camo.mailru.api.MailruApiService;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -55,12 +57,16 @@ public class MainActivity extends AppCompatActivity
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
+
                 PersistentCookieJar cookieJar =
                         new PersistentCookieJar(
                                 new SetCookieCache(),
                                 new SharedPrefsCookiePersistor(getApplicationContext())
                         );
-                Account account = new Account("", "", cookieJar);
+
+                ApiService provider = new MailruApiService(cookieJar);
+
+                Account account = new Account("", "", provider);
                 try {
                     account.Login();
                     account.getDiskUsage();

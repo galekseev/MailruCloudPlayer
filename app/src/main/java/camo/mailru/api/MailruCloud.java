@@ -6,12 +6,6 @@ import java.util.List;
 
 import camo.mailru.api.json.Folder;
 import camo.mailru.api.json.FolderMeta;
-import camo.mailru.api.json.JsonObjectType;
-import camo.mailru.api.json.JsonParser;
-import okhttp3.CookieJar;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Created by AlekseevGA on 14.12.2017.
@@ -21,19 +15,20 @@ public class MailruCloud {
 
     public static final String CLOUD_ROOT_FOLDER = "/";
 
-    private Account account = null;
+    private ApiService apiService;
     private CloudApi api = null;
-    private OkHttpClient okHttpClient = null;
+
+    private Account account = null;
 
     /**
      * Initializes a new instance of the MailruCloud class with login and password.
      */
-    public MailruCloud(String login, String password, CookieJar cookieJar){
-        this.account = new Account(login, password, cookieJar);
+    public MailruCloud(String login, String password, ApiService provider){
+        this.apiService = provider;
+        this.api = provider.createService();
 
-        MailruApiService.build(cookieJar);
-        api = MailruApiService.createService(CloudApi.class);
-    }
+        this.account = new Account(login, password, this.apiService);
+   }
 
     public boolean Login() throws IOException{
         return this.account.Login();
@@ -53,13 +48,6 @@ public class MailruCloud {
 
         Folder entry = api.getFolder(path, account.getAuthToken()).execute().body();
         return entry;
-
-//        Request request = RequestBuilder.buildGetItemRequest(path, account.getAuthToken());
-//        Response response = executeRequest(request);
-
-//        String json = response.body().string();
-//        Folder entry = (Folder)JsonParser.Parse(json, JsonObjectType.Entry);
-
     }
 
     /**
@@ -77,38 +65,26 @@ public class MailruCloud {
      * @param root Path to specific folder.
      * @return Latest copy of folder info and structure
      */
-    public Folder GetFoldersTreeAsync(String root) throws IOException {
+    public Folder GetFoldersTree(String root) throws IOException {
         Folder entry = getItem(root);
-        Folder tree = GetFoldersTreeAsync(entry);
+        Folder tree = GetFoldersTree(entry);
         return tree;
     }
 
-    public Folder GetFoldersTreeAsync(Folder root) throws IOException
+    public Folder GetFoldersTree(Folder root) throws IOException
     {
+        //TODO rewrite with async calls
         List<Folder> folders = new ArrayList<>();
 
         for (FolderMeta folder : root.getFolders())
         {
             Folder entry = getItem(folder.home);
-            Folder new_folder = GetFoldersTreeAsync(entry);
+            Folder new_folder = GetFoldersTree(entry);
             folders.add(new_folder);
         }
 
         root.updateFolders(folders);
 
         return root;
-    }
-
-    private Response executeRequest(Request request) throws IOException{
-        //TODO: Add http code exception handling
-        Response response = okHttpClient.newCall(request).execute();
-
-        if (!response.isSuccessful()) {
-            int code = response.code();
-            response.close();
-            throw new IOException("Response failed with code: " + code);
-        }
-
-        return response;
     }
 }

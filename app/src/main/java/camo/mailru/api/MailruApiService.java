@@ -1,45 +1,53 @@
 package camo.mailru.api;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import camo.mailru.api.json.EntriesList;
+import camo.mailru.api.json.EntriesListDeserializer;
 import okhttp3.CookieJar;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MailruApiService {
+public class MailruApiService implements ApiService {
 
-    private static final String BASE_URL = "https://cloud.mail.ru/api/v2/";
+    private CookieJar cookieJar;
+    private OkHttpClient httpClient;
+    private Retrofit retrofit;
+    private CloudApi api;
 
-    private static Retrofit.Builder builder =
-            new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create());
+    public MailruApiService(CookieJar jar){
+        cookieJar = jar;
 
-    private static Retrofit retrofit = null;
+        httpClient = new OkHttpClient.Builder()
+                .cookieJar(cookieJar)
+                .build();
 
-    private static OkHttpClient.Builder httpClient =
-            new OkHttpClient.Builder();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(EntriesList.class, new EntriesListDeserializer())
+                .create();
 
-    private static HttpLoggingInterceptor logging =
-            new HttpLoggingInterceptor()
-                    .setLevel(HttpLoggingInterceptor.Level.NONE);
-
-    public static void build(CookieJar cookieJar){
-        build(cookieJar, HttpLoggingInterceptor.Level.NONE);
+        retrofit = new Retrofit.Builder()
+                .baseUrl(RequestBuilder.API_BASE_URL)
+                .client(httpClient)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
     }
 
-    public static void build(CookieJar cookieJar, HttpLoggingInterceptor.Level level){
-        httpClient.cookieJar(cookieJar);
-
-        if (!httpClient.interceptors().contains(logging)) {
-            httpClient.addInterceptor(logging);
-        }
-
-        builder.client(httpClient.build());
-        retrofit = builder.build();
+    @Override
+    public CloudApi createService() {
+        api = retrofit.create(CloudApi.class);
+        return api;
     }
 
-    public static <S> S createService(Class<S> serviceClass) {
-        return retrofit.create(serviceClass);
+    @Override
+    public OkHttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    @Override
+    public CookieJar getCookieJar() {
+        return cookieJar;
     }
 }

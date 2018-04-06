@@ -13,6 +13,8 @@ import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import java.io.IOException;
 
 import camo.mailru.api.Account;
+import camo.mailru.api.ApiService;
+import camo.mailru.api.MailruApiService;
 import camo.mailru.api.json.DiskUsage;
 
 /**
@@ -32,8 +34,10 @@ public class AccountTests {
                         new MemoryCookiePersistor()
                 );
 
-        account = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_PASSWORD, cookieJar);
-        failAccount = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_WRONG_PASSWORD, cookieJar);
+        ApiService provider = new MailruApiService(cookieJar);
+
+        account = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_PASSWORD, provider);
+        failAccount = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_WRONG_PASSWORD, provider);
     }
 
     @Test

@@ -10,13 +10,8 @@ import java.util.List;
 import camo.mailru.api.json.AuthToken;
 import camo.mailru.api.json.DiskUsage;
 import okhttp3.Cookie;
-import okhttp3.CookieJar;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import retrofit2.Call;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by AlekseevGA on 14.12.2017.
@@ -26,19 +21,23 @@ public class Account {
 
     private static final String TAG = "camo.mailru.api.Account";
 
-    private OkHttpClient okHttpClient;
-    private CookieJar cookieJar;
+    private ApiService apiService;
+    private CloudApi api;
+//    private OkHttpClient okHttpClient;
+//    private CookieJar cookieJar;
 
-    public Account(String login, String password, CookieJar cookieJar) {
+    public Account(String login, String password, ApiService provider) {
         this.loginName = login;
         this.password = password;
 
-        this.cookieJar = cookieJar;
-                //new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(context));
-
-        okHttpClient = new OkHttpClient.Builder()
-                .cookieJar(this.cookieJar)
-                .build();
+        apiService = provider;
+        api = provider.createService();
+//        this.cookieJar = provider.getCookieJar();
+//                //new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(context));
+//
+//        okHttpClient = new OkHttpClient.Builder()
+//                .cookieJar(this.cookieJar)
+//                .build();
     }
 
     //region public properties
@@ -72,7 +71,7 @@ public class Account {
         Response response = executeRequest(request);
         response.close();
 
-        List<Cookie> cookies = cookieJar.loadForRequest(RequestBuilder.getAuthUrl());
+        List<Cookie> cookies = apiService.getCookieJar().loadForRequest(RequestBuilder.getAuthUrl());
         if (cookies.size() > 0) {
             ensureSdcCookie();
             return obtainAuthToken();
@@ -103,7 +102,7 @@ public class Account {
     }
 
     private Response executeRequest(Request request) throws IOException{
-        Response response = okHttpClient.newCall(request).execute();
+        Response response = apiService.getHttpClient().newCall(request).execute();
 
         if (!response.isSuccessful()) {
             int code = response.code();
@@ -117,18 +116,9 @@ public class Account {
     public DiskUsage getDiskUsage() throws IOException {
         this.ensureAuth();
 
-        CloudApi api = MailruApiService.createService(CloudApi.class);
-
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .baseUrl("https://cloud.mail.ru/api/v2/")
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .client(okHttpClient)
-//                .build();
-//
-//        CloudApi api = retrofit.create(CloudApi.class);
-        Call<DiskUsage> call = api.getDiskUsage(2, loginName, getAuthToken());
-        DiskUsage diskUsage = call.execute().body();
+        DiskUsage diskUsage = api.getDiskUsage(2, loginName, getAuthToken()).execute().body();
         Log.v(TAG, "Successful got account info:" + diskUsage.toString());
+
         return diskUsage;
     }
 
@@ -142,7 +132,7 @@ public class Account {
         }
     }
 
-    public CookieJar getCookieJar() {
-        return this.cookieJar;
-    }
+//    public CookieJar getCookieJar() {
+//        return this.cookieJar;
+//    }
 }

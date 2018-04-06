@@ -9,13 +9,13 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import camo.mailru.api.Account;
+import camo.mailru.api.ApiService;
+import camo.mailru.api.MailruApiService;
 import camo.mailru.api.MailruCloud;
 import camo.mailru.api.json.Folder;
-import camo.mailru.api.json.FolderMeta;
 
 public class ApiTests {
-    private Account account = null;
+
     private MailruCloud api = null;
 
     @Before
@@ -26,34 +26,29 @@ public class ApiTests {
                         new MemoryCookiePersistor()
                 );
 
-        account = new Account(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_PASSWORD, cookieJar);
+        ApiService provider = new MailruApiService(cookieJar);
 
-        api = new MailruCloud(account);
+        api = new MailruCloud(CONSTANTS.TEST_LOGIN, CONSTANTS.TEST_PASSWORD, provider);
     }
 
     @Test
     public void testGetItem() throws IOException {
         Folder folder = api.getRoot();
-        assertEquals(folder.getName(), "/");
+        assertEquals(folder.getName(), MailruCloud.CLOUD_ROOT_FOLDER);
     }
 
     @Test
-    public void testGetNonExistingItem() {
-        try {
-            Folder folder = api.getItem("/NonExistingItem");
-            fail("Either folder exists on server or getItem isn't working as expected");
-        }
-        catch (Exception e)
-        {
-            assertEquals(e.getMessage(), "Response failed with code: 404");
-        }
-
+    public void testGetNonExistingItem() throws IOException {
+        Folder folder = api.getItem("/NonExistingItem");
+        assertNull(folder);
     }
 
     @Test
     public void testGetFolderTree() throws IOException {
-        Folder folder = api.GetFoldersTreeAsync(MailruCloud.CLOUD_ROOT_FOLDER);
+        Folder folder = api.GetFoldersTree(MailruCloud.CLOUD_ROOT_FOLDER);
         assertEquals(folder.getName(), "/");
+        assertEquals(folder.getFoldersCount(), 3);
+        assertEquals(folder.getFilesCount(), 10);
     }
 
 }
