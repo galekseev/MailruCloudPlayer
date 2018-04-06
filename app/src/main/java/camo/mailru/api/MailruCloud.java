@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import camo.mailru.api.json.File;
 import camo.mailru.api.json.Folder;
 import camo.mailru.api.json.FolderMeta;
 
@@ -87,4 +88,36 @@ public class MailruCloud {
 
         return root;
     }
+
+    /**
+     * Create folder on the server.
+     *
+     * @param name New path name.
+     * @param createIn Destination path.
+     * @return True or false operation result.
+     */
+//    public boolean CreateFolder(String name, String createIn)
+//    {
+//        return await this.AddFileInCloud(new File()
+//    {
+//        Name = name,
+//        FulPath = createIn.EndsWith("/") ? createIn + name : createIn + "/" + name,
+//        Hash = null,
+//        Size = new FileSize()
+//    {
+//        DefaultValue = 0
+//    }
+//    });
+//    }
+
+    /**
+     * Create file record in the cloud.
+     *
+     * @param fileInfo File info.
+     * @returns True or false result operation.
+     */
+//    private boolean AddFileInCloud(File fileInfo)
+//    {
+//        boolean hasFile = fileInfo.getHash() != null && fileInfo.getSize().getValue() > 0;
+//    }
 }
